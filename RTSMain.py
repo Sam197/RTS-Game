@@ -37,7 +37,7 @@ def main():
         clock.tick(30)
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:       # pylint: disable=no-member
                 running = False
 
         # for row in playMap:
@@ -45,9 +45,12 @@ def main():
         #         if col.has_changed:
         #             col.display(screen)
         
-        screen.blit(bg_img, (0,0))
-        
+        #screen.blit(bg_img, (0,0))
+        screen.fill(WHITE)
+        #pygame.draw.circle(screen, (0,0,0), (1000,750), 5)
+
         robo.find_destination(pygame.mouse.get_pos())
+        robo.move()
         robo.display(screen)
 
         pygame.display.flip()

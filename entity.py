@@ -9,8 +9,13 @@ class Entity:
         self.x = x
         self.y = y
         self.img = None
+        self.offsetWidth = 0
+        self.offsetHeight = 0
+        self.centreX = 0
+        self.centreY = 0
         self.ref_img = None
         self.rotateAngle = 0
+        self.imgRotateAngle = 0
 
     def find_quadrant(self, displacementX, displacementY):
         if displacementX > 0 and displacementY < 0:
@@ -37,7 +42,7 @@ class Entity:
             if sY == 0:
                 return 0         #0: Cursor on Entity
             elif sY < 0:
-                return 0          #1: Cursor above Entity
+                return 360          #1: Cursor above Entity
             elif sY > 0:
                 return 180         #2: Cursor Below Entity
         if sY == 0:
@@ -45,30 +50,36 @@ class Entity:
                 return 90          #Cursor to the left of Entity
             elif sX > 0:
                 return -90         #Curosr to the right of Entity
-        
         else:
             return False
-        
+         
 
     def find_destination(self, destination):
         destx, desty = destination
-        displacementX = destx - self.x
-        displacementY = desty - self.y
+        displacementX = (destx - self.offsetWidth) - self.x
+        displacementY = (desty - self.offsetHeight) - self.y
         zeros = self.findZeros(displacementX, displacementY)
         if zeros == False:
             self.rotateAngle = float(math.atan(displacementY/displacementX)*(180/math.pi))
             self.move_gradient = self.y/self.x
-            quadrant = self.find_quadrant(displacementX, displacementY)
-            self.rotateAngle = self.find_angle(quadrant)
+            self.quadrant = self.find_quadrant(displacementX, displacementY)
+            self.imgRotateAngle = self.find_angle(self.quadrant)
         else:
-            self.rotateAngle = zeros
+            self.imgRotateAngle = zeros
 
-    def move(self, destination):
-        pass
+    def move(self):
+        xComponent = int(round(ENTITY_SPEED*math.cos(math.radians(self.rotateAngle))))
+        yComponent = int(round(ENTITY_SPEED*math.sin(math.radians(self.rotateAngle))))
+        if self.quadrant == 3 or self.quadrant == 4:
+            xComponent = -xComponent
+        if self.quadrant == 4 or self.quadrant == 3:
+            yComponent = -yComponent
+        self.x += xComponent
+        self.y += yComponent
 
     def display(self, screen):
-        # self.ref_img = transform.rotate(self.img, self.rotateAngle)
+        # self.ref_img = transform.rotate(self.img, self.imgRotateAngle)
         # screen.blit(self.ref_img, (self.x, self.y))
-        rotated_image = transform.rotate(self.img, self.rotateAngle)
+        rotated_image = transform.rotate(self.img, self.imgRotateAngle)
         new_rect = rotated_image.get_rect(center = self.img.get_rect(topleft = (self.x,self.y)).center)
         screen.blit(rotated_image, new_rect.topleft)
